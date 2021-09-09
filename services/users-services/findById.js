@@ -1,41 +1,27 @@
 const express = require('express');
-
+var ObjectId = require('mongodb').ObjectId;
+var mongo = require('mongodb');
 const app = express.Router()
+
+const client = require('../../dbConnection');
 
 app.use(express.json())
 
-let users = [
-    {
-        id: 0,
-        name: 'Harsh'
-    },
-    {
-        id: 1,
-        name: 'Mukesh'
-    },
-    {
-        id: 2,
-        name: 'Sonu',
-        age: "23"
-    },
-]
-
-const findById = (id) => {
-    return (users.find(ele => ele.id === parseInt(id)))
-}
 
 app.get('/app/users/:id', (req, res) => {
     try{
-        if(findById(req.params.id)){
-            res.send(findById(req.params.id))
-        } else {
-            
-            throw res.status(404)
-        }
-    } catch (err) {
-        res.send('User Not Found')
+        const query = {_id : ObjectId(req.params.id)};
+        const collection = client.db('myprj').collection('users');
+        const data = collection.findOne(query);
+        data.then(record => {
+            res.send(record);
+        }).catch(err => {
+            res.send({});
+        })
+    }
+    catch (err){
+        res.send('No Data Available')
     }
 })
-
 
 module.exports = app

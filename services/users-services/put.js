@@ -1,4 +1,5 @@
 const express = require('express');
+var ObjectId = require('mongodb').ObjectId;
 
 const app = express.Router()
 
@@ -6,29 +7,25 @@ const client = require('../../dbConnection');
 
 app.use(express.json())
 
-const findById = (id) => {
-    return (users.find(ele => ele.id === parseInt(id)))
-}
-
 app.put('/app/users', (req, res) => {
-    try {
-        const collection = client.db('myprj').collection('users');
-        collection.find({_id: '6138ac79cbc9225e5dc4e95d'}).toArray((err, data) => {
-            res.send(data)
-        })
-        // if(req.body.id){
-        //     collection.insertOne(newUser, (err) => {
-        //         assert.equal(err,null);
-        //         console.log('user created')
-                
-        //     })
-        //     res.send(users)
-        // } else {
-        //     throw res.status(404)
-        // }
-    } catch (err) {
-        res.send('User Not Found for Update')
+    const query = {_id : ObjectId(req.body.id)};
+    let updateUser = {
+        name: req.body.name,
+        age: req.body.age
     }
+    const collection = client.db('myprj').collection('users');
+    const update = collection.updateOne(query, {$set: updateUser})
+    update.then(() => {
+        const find = collection.findOne(query)
+        find.then(result => {
+            res.send(result)
+        }).catch(err => {
+            res.send('no data ha')
+        })
+    }).catch(err => {
+        console.log(err)
+        res.send('no data')
+    })
 })
 
 module.exports = app

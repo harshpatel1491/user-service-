@@ -1,5 +1,4 @@
 const express = require('express');
-const assert = require('assert');
 
 const app = express.Router()
 app.use(express.json())
@@ -15,8 +14,6 @@ app.post('/app/users', (req, res) => {
             }
             const collection = client.db('myprj').collection('users');
             collection.insertOne(newUser, (err) => {
-                assert.equal(err,null);
-                console.log('user created')
                 collection.find({}).toArray((err, data) => {
                     res.send(data)
                 })

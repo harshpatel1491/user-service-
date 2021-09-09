@@ -1,5 +1,5 @@
 const express = require('express');
-var ObjectId = require('mongodb');
+var ObjectId = require('mongodb').ObjectId;
 var mongo = require('mongodb');
 const app = express.Router()
 
@@ -10,12 +10,13 @@ app.use(express.json())
 
 app.get('/app/users', (req, res) => {
     try{
-        const newId = new ObjectId('6138ac79cbc9225e5dc4e95d')
-        console.log(newId)
         const collection = client.db('myprj').collection('users');
-        collection.findOneAndDelete({_id: newId}).toArray((err, data) => {
-            res.send(data)
-            console.log(data)
+        const data = collection.find({}).toArray();
+        data.then(record => {
+            res.send(record);
+        }).catch(err => {
+            console.log(err);
+            res.send({});
         })
     }
     catch (err){

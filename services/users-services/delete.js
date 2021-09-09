@@ -1,39 +1,32 @@
 const express = require('express');
-
+var ObjectId = require('mongodb').ObjectId;
+var mongo = require('mongodb');
 const app = express.Router()
+
+const client = require('../../dbConnection');
 
 app.use(express.json())
 
-let users = [
-    {
-        id: 0,
-        name: 'Harsh'
-    },
-    {
-        id: 1,
-        name: 'Mukesh'
-    },
-    {
-        id: 2,
-        name: 'Sonu',
-        age: "23"
-    },
-]
-
-const findById = (id) => {
-    return (users.find(ele => ele.id === parseInt(id)))
-}
 
 app.delete('/app/users/:id', (req, res) => {
-    try {
-        if(findById(req.params.id)){
-            users = users.filter(ele => ele.id !== parseInt(req.params.id))
-            res.send(users)
-        } else {
-            throw res.status(404)
-        }
-    } catch (err) {
-        res.send('User Not Found for Delete')
+    try{
+        const query = {_id : ObjectId(req.params.id)};
+        const collection = client.db('myprj').collection('users');
+        const data = collection.deleteOne(query);
+        data.then(() => {
+            const find = collection.find({}).toArray()
+            find.then(record => {
+                res.send(record);
+            }).catch(err => {
+                console.log(err);
+                res.send('no data');
+            })
+        }).catch(err => {
+            res.send({});
+        })
+    }
+    catch (err){
+        res.send('No Data Available')
     }
 })
 
